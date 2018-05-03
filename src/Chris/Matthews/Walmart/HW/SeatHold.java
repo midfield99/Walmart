@@ -12,8 +12,8 @@ public class SeatHold {
     public final int Id;
     public final String venue;
     public final List<String> heldSeats;
-    public String confirmationCode;
     public String email;
+    private String confirmationCode;
     private boolean confirmed;
 
     public SeatHold(int uniqueId, String venueName)

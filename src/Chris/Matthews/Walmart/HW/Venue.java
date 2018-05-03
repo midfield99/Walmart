@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import javafx.util.Pair;
 
 public class Venue implements  TicketService {
     /*It looks to me like a section of seats in the same location would be useful to work with.
@@ -87,30 +88,41 @@ public class Venue implements  TicketService {
     }
 
     public final String VenueName;
-
     private List<SeatSection> sections;
     private int free;
     private HashMap<Integer, SeatHold> seatHoldMap;
-    public Venue (int size, String name) {
-        free = size;
+
+    /**
+     * Venue Constructor
+     * @param seat_sections List of pairs related to seat sections.
+     *                      pair.getKey() is section size.
+     *                      pair.getValue() is qualityRank. 0 is highest quality, max int is lowest.
+     * @param name name of venue.
+     */
+    public Venue(List<Pair<Integer, Integer>> seat_sections, String name) {
+        free = 0;
         sections = new ArrayList<>();
         seatHoldMap = new HashMap<>();
         VenueName = name;
-        //Should add more initialization code later. I can't really test this if I can't control SeatSection creation.
+
+        for (Pair<Integer, Integer> p: seat_sections) {
+            sections.add(new SeatSection(p.getKey(), p.getValue(), sections.size()));
+            free += p.getKey();
+        }
     }
 
-    public  int reserveSeats(int numSeats, SeatHold buyer)
-    {
-        //preconditions: 0 < numSeats, buyer is not null
-        if (numSeats <= 0) {
-            throw new RuntimeException("numSeats needs to be a positive number");
-        }
+
+    public String reserveSeats(int seatHoldId, String customerEmail) {
+        SeatHold buyer = seatHoldMap.get(seatHoldId);
+        //precondition: not null SeatHold
         if (buyer == null) {
-            throw new RuntimeException("SeatHold object can't be null");
+            throw new RuntimeException("SeatHold object not found");
         }
 
+        buyer.setEmail(customerEmail);
+        buyer.confirm();
 
-        return -1;
+        return buyer.getConfirmationCode();
     }
 
     public int removeSeatHold(SeatHold buyer) {
@@ -169,28 +181,35 @@ public class Venue implements  TicketService {
         /*preconditions: numSeats is valid. Assume customerEmail is valid and that a show will be handled by only
         one Venue object instance. Otherwise id generation should be changed to enforce uniqueness.
          */
+        if (numSeats < 1) {
+            throw new RuntimeException("Invalid numSeats. At least one seat must be reserved.");
+        }
+        if (numSeats > free) {
+            throw new RuntimeException("Not enough seats are available to hold.");
+        }
+        if (customerEmail == null) {
+            throw new RuntimeException("customerEmail can't be null.");
+        }
+
         List<SeatSection> rankedSeatSections;
         int id = seatHoldMap.size();
         SeatHold buyer = new SeatHold(id ,VenueName);
 
         //Check if there are sections with room for the entire group.
         rankedSeatSections = getRankedSeatSections(numSeats);
-        //Yes, place group in one section.
-        if (!rankedSeatSections.isEmpty()) {
-            rankedSeatSections.get(0).reserveSeats(numSeats, buyer);
+        if (rankedSeatSections.isEmpty()) {
+            //if not break up group.
+            rankedSeatSections = getRankedSeatSections();
         }
-        else {
-            /*No, separate group. This method is kind of naive, especially near the end. It doesn't minimize the number
-            of different sections the group is in. In fact, group splintering may be a little worse than needed,
-            especially for groups near the end.
-            */
-            int held = 0;
-            rankedSeatSections = getRankedSeatSections(numSeats);
-            for (SeatSection s: rankedSeatSections) {
-                held += s.reserveSeats(numSeats - held, buyer);
-                if (held >= numSeats){
-                    break;
-                }
+
+        /*Note, method is kind of naive, especially if the group can't fit on one row. It doesn't minimize the number
+        of different sections the group is in. In fact, group splintering may be a little worse than needed,
+        especially for late purchasers. */
+        int held = 0;
+        for (SeatSection s: rankedSeatSections) {
+            held += s.reserveSeats(numSeats - held, buyer);
+            if (held >= numSeats){
+                break;
             }
         }
 
@@ -199,19 +218,5 @@ public class Venue implements  TicketService {
         Seat reservations have been made with the quality of seats in mind. And nothing else has changed.
          */
         return buyer;
-    }
-
-
-    public String reserveSeats(int seatHoldId, String customerEmail) {
-        SeatHold buyer = seatHoldMap.get(seatHoldId);
-        //precondition: not null SeatHold
-        if (buyer == null) {
-            throw new RuntimeException("SeatHold object not found");
-        }
-
-        buyer.setEmail(customerEmail);
-        buyer.confirm();
-
-        return buyer.getConfirmationCode();
     }
 }
