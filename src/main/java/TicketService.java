@@ -1,5 +1,3 @@
-package Chris.Matthews.Walmart.HW;
-
 /**
  * Copied from assignment
  */

@@ -1,5 +1,3 @@
-package Chris.Matthews.Walmart.HW;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +46,23 @@ public class VenueTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void findAndHoldSeatsMinSeatsNotMet() throws RuntimeException {
+    public void removeSeatHold()
+    {
+        List<Pair<Integer, Integer>> seat_sections = getSeatSections();
+        Venue kennedy = new Venue(seat_sections, "Kennedy_Center");
+
+        assertTrue(kennedy.numSeatsAvailable() == 15);
+        SeatHold removed = kennedy.findAndHoldSeats(5, "removed_buyer");
+        assertTrue(kennedy.numSeatsAvailable() == 10);
+        assertFalse(removed.heldSeats.isEmpty());
+
+        kennedy.removeSeatHold(removed);
+        assertTrue(removed.heldSeats.isEmpty());
+        assertTrue(kennedy.numSeatsAvailable() == 15);
+    }
+
+    @Test
+    public void findAndHoldSeatsMinSeatsNotMet() {
         List<Pair<Integer, Integer>> seat_sections = getSeatSections();
         Venue kennedy = new Venue(seat_sections, "Kennedy_Center");
 
@@ -59,7 +73,7 @@ public class VenueTest {
     }
 
     @Test
-    public void findAndHoldSeatsNotEnoughSeats() throws RuntimeException {
+    public void findAndHoldSeatsNotEnoughSeats() {
         List<Pair<Integer, Integer>> seat_sections = getSeatSections();
         Venue kennedy = new Venue(seat_sections, "Kennedy_Center");
 
@@ -70,7 +84,7 @@ public class VenueTest {
     }
 
     @Test
-    public void findAndHoldSeatsNullEmail() throws RuntimeException {
+    public void findAndHoldSeatsNullEmail() {
         List<Pair<Integer, Integer>> seat_sections = getSeatSections();
         Venue kennedy = new Venue(seat_sections, "Kennedy_Center");
 

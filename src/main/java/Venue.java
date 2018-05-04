@@ -1,5 +1,3 @@
-package Chris.Matthews.Walmart.HW;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,7 +27,7 @@ public class Venue implements  TicketService {
 
         /*
 
-        */
+         */
         public String getSeatId(int seat){
             return Integer.toString(sectionId) + "_" + Integer.toString(seat);
         }
@@ -71,7 +69,7 @@ public class Venue implements  TicketService {
 
             int found = 0;
             for (int i = 0; i < seatHoldIds.length; i++) {
-                if (seatHoldIds[i] == buyer.Id) {
+                if (seatHoldIds[i] !=null && seatHoldIds[i] == buyer.Id) {
                     seatHoldIds[i] = null;
                     found += 1;
                 }
