@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -13,11 +14,11 @@ public class VenueTest {
 
     private List<Pair<Integer, Integer>> getSeatSections() {
         List li = new ArrayList();
-        li.add(new Pair(5,7));
-        li.add(new Pair(4,2));
-        li.add(new Pair(3,0));
-        li.add(new Pair(2,9));
-        li.add(new Pair(1,1));
+        li.add(new ImmutablePair(5,7));
+        li.add(new ImmutablePair(4,2));
+        li.add(new ImmutablePair(3,0));
+        li.add(new ImmutablePair(2,9));
+        li.add(new ImmutablePair(1,1));
         return li; //size = 15
     }
 

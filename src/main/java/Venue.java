@@ -3,7 +3,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Venue implements  TicketService {
     /*It looks to me like a section of seats in the same location would be useful to work with.
