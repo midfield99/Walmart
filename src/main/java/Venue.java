@@ -1,3 +1,5 @@
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -86,6 +88,7 @@ public class Venue implements  TicketService {
     }
 
     public final String VenueName;
+    private final long holdLimit;
     private List<SeatSection> sections;
     private int free;
     private HashMap<Integer, SeatHold> seatHoldMap;
@@ -96,12 +99,23 @@ public class Venue implements  TicketService {
      *                      pair.getKey() is section size.
      *                      pair.getValue() is qualityRank. 0 is highest quality, max int is lowest.
      * @param name name of venue.
+     * @param maxHoldTime max time a seat can be held without confirming purchase, in seconds
      */
-    public Venue(List<Pair<Integer, Integer>> seat_sections, String name) {
+    public Venue(List<Pair<Integer, Integer>> seat_sections, String name, long maxHoldTime) {
+        new java.util.Timer().scheduleAtFixedRate(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() { checkHeldSeats(); }
+                },
+                1,
+                1000
+        );
+
         free = 0;
         sections = new ArrayList<>();
         seatHoldMap = new HashMap<>();
         VenueName = name;
+        holdLimit = maxHoldTime;
 
         for (Pair<Integer, Integer> p: seat_sections) {
             sections.add(new SeatSection(p.getKey(), p.getValue(), sections.size()));
@@ -109,6 +123,32 @@ public class Venue implements  TicketService {
         }
     }
 
+    /**
+     * Overloaded Venue Constructor
+     * @param seat_sections List of pairs related to seat sections.
+     *                      pair.getKey() is section size.
+     *                      pair.getValue() is qualityRank. 0 is highest quality, max int is lowest.
+     * @param name name of venue.
+     *
+     * maxHoldTime is set to 600 seconds
+     */
+    public Venue(List<Pair<Integer, Integer>> seat_sections, String name) {
+        this(seat_sections, name, 600);
+    }
+
+    /**
+     * Checks Held Seats to make sure unconfirmed seats should not be removed.
+     */
+    private void checkHeldSeats() {
+        for (HashMap.Entry<Integer, SeatHold> en : seatHoldMap.entrySet())
+        {
+            SeatHold buyer = en.getValue();
+            long timeAlive = Duration.between(buyer.creationTime, LocalTime.now()).getSeconds();
+            if (!buyer.isConfirmed() && buyer.heldSeats.size() > 0 && timeAlive >= holdLimit) {
+                removeSeatHold(buyer);
+            }
+        }
+    }
 
     public String reserveSeats(int seatHoldId, String customerEmail) {
         SeatHold buyer = seatHoldMap.get(seatHoldId);

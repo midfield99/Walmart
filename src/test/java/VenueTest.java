@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Rule;
@@ -45,6 +47,31 @@ public class VenueTest {
     //Test preconditions for findAndHoldSeats
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @Test
+    public void checkHeldSeats() throws InterruptedException{
+        List<Pair<Integer, Integer>> seat_sections = getSeatSections();
+        Venue kennedy = new Venue(seat_sections, "Kennedy_Center", 4);
+
+        assertTrue(kennedy.numSeatsAvailable() == 15);
+        SeatHold buyer1 = kennedy.findAndHoldSeats(5, "buyer1");
+        TimeUnit.SECONDS.sleep(1);
+        SeatHold buyer2 = kennedy.findAndHoldSeats(1, "buyer2");
+        TimeUnit.SECONDS.sleep(1);
+        SeatHold buyer3 = kennedy.findAndHoldSeats(6, "buyer3");
+        TimeUnit.SECONDS.sleep(1);
+        //all holds exist
+        assertTrue(kennedy.numSeatsAvailable() == 3);
+        kennedy.reserveSeats(buyer2.Id, "email");
+
+        //buyer1 loses held seats
+        TimeUnit.SECONDS.sleep(3);
+        assertTrue(kennedy.numSeatsAvailable() == 8);
+
+        //buyer3 loses held seats, but not buyer 2
+        TimeUnit.SECONDS.sleep(2);
+        assertTrue(kennedy.numSeatsAvailable() == 14);
+    }
 
     @Test
     public void removeSeatHold()

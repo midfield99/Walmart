@@ -1,15 +1,15 @@
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * The SeatHold class contains data about a customer's held or reserved seats.
- *
- * A timer would be useful, so that user's ability to hold seats without purchasing them is limited.
  */
 public class SeatHold {
     public final int Id;
     public final String venue;
     public final List<String> heldSeats;
+    public final LocalTime creationTime;
     public String email;
     private String confirmationCode;
     private boolean confirmed;
@@ -21,11 +21,11 @@ public class SeatHold {
         heldSeats = new ArrayList<>();
         confirmationCode = null;
         confirmed = false;
+        creationTime = LocalTime.now();
     }
 
     /**
      * @return boolean. Has the SeatHold been confirmed?
-     * Technically not used yet, but probably would be useful.
      */
     public boolean isConfirmed() {return confirmed;}
 
